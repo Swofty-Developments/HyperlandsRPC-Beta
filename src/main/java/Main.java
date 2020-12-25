@@ -1,21 +1,23 @@
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 
 public class Main extends JFrame
 {
-    // ENTER USERNAME
-    private static String username = "username";
-
-
+    private static String username = "ProperPoli777";
     private static String gamemode = "offline";
     private static int count = 0;
     private static boolean automatic = true;
@@ -41,24 +43,23 @@ public class Main extends JFrame
             System.out.println("-Thread0 [NOTIFICATION] UpdateStats was ran");
 
             // HIDDEN
-            URL url = new URL(" " + username);
-            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            String line = in.readLine();
+            String sURL = "http://ca.hyperlandsmc.net:9100/api/" + username;
+            URL url = new URL(sURL);
+            URLConnection request = url.openConnection();
+            request.connect();
 
-            int StartCut = line.indexOf("last") + 6;
-            lastgamemode = line.substring(StartCut);
-            lastgamemode = lastgamemode.substring(1, line.indexOf(",") - 7);
+            // Convert to a JSON object to print data
+            JsonParser jp = new JsonParser(); //from gson
+            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+            JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
 
-            StartCut = line.indexOf("Level") + 7;
-            level = line.substring(StartCut);
-            level = level.substring(0, line.indexOf(",") - 13);
+            lastgamemode = rootobj.get("last").getAsString();
 
-            StartCut = line.indexOf("status") + 9;
-            online = line.substring(StartCut);
-            online = online.substring(0, line.indexOf(",") - 8);
+            level = rootobj.get("Level").getAsString();
 
-            in.close();
-        } catch (StringIndexOutOfBoundsException v) {
+            online = rootobj.get("status").getAsString();
+
+        } catch (NullPointerException v) {
             if (startUp = true) {
                 lastgamemode = "Lobby-1";
                 level = "Intializing";
@@ -79,6 +80,7 @@ public class Main extends JFrame
             while (true) {
                 try {
                     if (automatic) {
+                        Thread.sleep(5001);
                         try {
                             updateStats(username);
                         } catch (IOException e) {
@@ -111,8 +113,6 @@ public class Main extends JFrame
                         } else {
                             gamemode = "lobby";
                         }
-
-                        Thread.sleep(5001);
                     } else {
                         return;
                     }
