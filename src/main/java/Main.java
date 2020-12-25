@@ -43,7 +43,7 @@ public class Main extends JFrame
             System.out.println("-Thread0 [NOTIFICATION] UpdateStats was ran");
 
             // HIDDEN
-            String sURL = "http://ca.hyperlandsmc.net:9100/api/" + username;
+            String sURL = " " + username;
             URL url = new URL(sURL);
             URLConnection request = url.openConnection();
             request.connect();
